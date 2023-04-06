@@ -1,0 +1,33 @@
+version: "2.2.3"
+
+services:
+  server:
+    build: .
+    ports:
+      - '8080:8080'
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - my-server:/var/log/tomcat
+
+  db:
+    image: mysql:8.0.31
+    environment:
+      MYSQL_ROOT_USER: 'root'
+      MYSQL_ROOT_PASSWORD: 'X9nmDiGX'
+    ports:
+      - '3305:3306'
+    command: --init-file /data/application/schema.sql
+    volumes:
+      - my-db:/var/lib/mysql
+      - ./todo-persistence/src/main/resources/schema.sql:/data/application/schema.sql
+    healthcheck:
+      test: "/usr/bin/mysql --user=root --password=X9nmDiGX --execute \"SHOW DATABASES;\""
+      interval: 2s
+      timeout: 30s
+      retries: 10
+
+volumes:
+  my-db:
+  my-server:
